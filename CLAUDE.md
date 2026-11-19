@@ -36,6 +36,11 @@ Set a status to `Approved` only after the user says yes in the chat. Details: `s
 - **Git: the user commits, not Claude.** Never run `git commit` or `git push`. At the end of a piece of work, give the user a ready-to-copy commit message. Never add `Co-Authored-By` or any Claude/AI attribution.
 - **Secrets.** Never read, print or change `.env`. Code loads it with python-dotenv. New key names go in `.env.example` (empty values).
 
+## Glossary
+
+`GLOSSARY.md` — one file, grouped by topic, A-Z inside each group. Each entry: 2-3 simple lines.
+Add terms the user asks for. When a new key term comes up, **suggest** adding it (don't add without asking).
+
 ## Commands
 
 - Tests (all): `uv run pytest` · one project: `uv run pytest agents/<project>`

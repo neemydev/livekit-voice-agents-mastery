@@ -1,5 +1,10 @@
 {
   "enabledMcpjsonServers": ["livekit-docs"],
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
   "hooks": {
     "PreToolUse": [
       {

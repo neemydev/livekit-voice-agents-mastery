@@ -33,6 +33,7 @@ Set a status to `Approved` only after the user says yes in the chat. Details: `s
 
 - **LiveKit docs, not memory.** Use the `livekit-docs` MCP server and the `livekit-agents` skill before writing LiveKit code. Check Docker setup against the docs too.
 - **Proof before "done".** Run the tests and show the output. A bug fix starts with a failing test.
+- **Git: the user commits, not Claude.** Never run `git commit` or `git push`. At the end of a piece of work, give the user a ready-to-copy commit message. Never add `Co-Authored-By` or any Claude/AI attribution.
 - **Secrets.** Never read, print or change `.env`. Code loads it with python-dotenv. New key names go in `.env.example` (empty values).
 
 ## Commands

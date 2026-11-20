@@ -6,7 +6,7 @@ Each course link is `https://www.livekit-academy.com/courses/<slug>`.
 Mark `[x]` when a course is done. Add the spec number we built for it, if any.
 
 ## Track 0: Understanding LiveKit
-- [ ] LiveKit Architecture — `livekit-architecture`
+- [ ] LiveKit Architecture — `livekit-architecture` (in progress: concepts covered, built spec `infra/001`)
 - [ ] Competitive Landscape — `competitive-landscape`
 
 ## Track 1: Foundations

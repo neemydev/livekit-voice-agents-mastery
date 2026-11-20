@@ -4,6 +4,29 @@ Newest entry at the top. Each entry: what we did, what we learned, what is next.
 
 ---
 
+## 2026-11-20 — Self-hosted LiveKit server running in Docker
+
+**Done**
+- Wrote and approved intent, spec and plan for `specs/infra/001-local-livekit-server/`. The plan is now **Tested**.
+- `docker compose up -d` starts LiveKit `v1.13.11` locally. Settings in `infra/livekit/livekit.yaml`, every line commented.
+- Ports: 7880 signaling/API, 7882 UDP media (main), 7881 TCP media (backup). Mapped to `127.0.0.1` only.
+- 3 new tests (server says OK, create/list/delete a room, wrong secret refused). With the server off they skip.
+- Real media test: the demo bot streamed video, and I saw it in my browser through my own server.
+- Added 24 glossary terms (SFU, P2P, MCU, signaling, ICE, UDP mux, bind address, health check, ...).
+
+**Learned**
+- An SFU gets each track **once** and forwards copies. No mixing, so it's fast. P2P and MCU don't scale as well.
+- Signaling (setup talk, WebSocket 7880) and media (the sound itself, UDP 7882) take different roads.
+- In a container, the server must listen on `0.0.0.0`, and it must tell browsers to send media to `127.0.0.1`.
+- The server log shows which road won: `[selected] udp4 127.0.0.1:7882`. That is ICE at work.
+- A container can say "healthy" while media still fails. Only a real media test proves it.
+
+**Next**
+- Start a new chat, so the `livekit-docs` MCP server loads.
+- Spec 002: our first voice agent, connected to the local server. Decide: agent on the Mac first, or in Docker?
+
+---
+
 ## 2026-11-19 — Four projects, Docker, GitHub-ready
 
 **Done**

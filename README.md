@@ -34,4 +34,33 @@ uv sync                   # install dependencies
 uv run pytest             # run the tests
 ```
 
-Docker setup comes with the first project.
+## Local LiveKit server
+
+A self-hosted LiveKit server runs in Docker, so no LiveKit Cloud account is needed while learning.
+Settings: [`infra/livekit/livekit.yaml`](infra/livekit/livekit.yaml). Spec: [`specs/infra/001-local-livekit-server/`](specs/infra/001-local-livekit-server/).
+
+```bash
+docker compose up -d              # start it
+docker compose ps                 # check: should say "healthy"
+curl http://localhost:7880        # check: prints "OK"
+docker compose logs -f livekit    # watch participants and tracks arrive
+docker compose down               # stop it
+```
+
+Connect with: URL `ws://localhost:7880`, API key `devkey`, API secret `secret`.
+These dev keys are public - fine on your own computer, never on a server on the internet.
+
+**Try real media** (needs the [LiveKit CLI](https://docs.livekit.io/intro/basics/cli.md), `lk`):
+
+```bash
+# 1. A demo bot joins room "my-first-room" and streams a demo video
+lk room join --url ws://localhost:7880 --api-key devkey --api-secret secret \
+  --identity demo-bot --publish-demo my-first-room
+
+# 2. In another terminal, make a token for yourself
+lk token create --api-key devkey --api-secret secret \
+  --join --room my-first-room --identity you --valid-for 24h
+```
+
+Then open <https://meet.livekit.io/?tab=custom>, enter `ws://localhost:7880` and your token, and join.
+You should see the bot's video.

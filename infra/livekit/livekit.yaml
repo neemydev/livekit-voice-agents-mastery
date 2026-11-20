@@ -1,0 +1,38 @@
+# LiveKit server settings for LOCAL development on your Mac.
+# Spec: specs/infra/001-local-livekit-server/
+# Full list of settings: https://github.com/livekit/livekit/blob/master/config-sample.yaml
+
+# Port 7880: the "front door" for signaling (WebSocket) and the server API.
+port: 7880
+
+# Which network addresses to listen on, INSIDE the container.
+# 0.0.0.0 = "all of them". LiveKit's default is 127.0.0.1, which inside a container
+# means "only the container itself" - then Docker's port mapping could not reach it.
+bind_addresses:
+  - "0.0.0.0"
+
+# Development mode: friendlier defaults for local work (no warning about our short secret).
+development: true
+
+# API key and secret, as "key: secret". Used to sign access tokens and API calls.
+# devkey / secret are PUBLIC, well-known values. Never use them on a server on the internet.
+keys:
+  devkey: secret
+
+# WebRTC settings: how the actual audio/video travels.
+rtc:
+  # Backup media path over TCP, used when UDP is blocked.
+  tcp_port: 7881
+  # Main media path: ALL UDP media goes through this one port (a "UDP mux").
+  # Do not set port_range_start / port_range_end - if they are set, udp_port is ignored.
+  udp_port: 7882
+  # Do not ask the internet for our public IP address (we are local only)...
+  use_external_ip: false
+  # ...instead, tell every client: "send your media to 127.0.0.1" (= your Mac).
+  # Docker's port mapping then carries it from your Mac into the container.
+  node_ip: 127.0.0.1
+
+# Logs.
+logging:
+  # "info" is readable. Development mode would otherwise switch on very noisy "debug" logs.
+  level: info

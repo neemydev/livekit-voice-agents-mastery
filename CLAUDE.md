@@ -45,7 +45,8 @@ Add terms the user asks for. When a new key term comes up, **suggest** adding it
 
 - Tests (all): `uv run pytest` · one project: `uv run pytest agents/<project>`
 - Add a package: `uv add <package>` (dev tools: `uv add --dev <package>`)
-- Docker commands: added when the first project's plan sets Docker up.
+- Local LiveKit server (spec `specs/infra/001-local-livekit-server/`): `docker compose up -d` · `docker compose ps` (should say healthy) · `docker compose logs -f livekit` · `docker compose down`
+- LiveKit server tests need the server running; with it off they are skipped, not failed.
 
 ## Hooks (always on, in `.claude/settings.json`)
 

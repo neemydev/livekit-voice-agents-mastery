@@ -1,0 +1,29 @@
+# Starts everything this repo needs, with one command:   docker compose up -d
+# Stop it again with:                                     docker compose down
+# For now that is just the LiveKit server. Later, our agents join this file too.
+
+services:
+  livekit:
+    # The official LiveKit server image, PINNED to one version so it can't change under us.
+    image: livekit/livekit-server:v1.13.11
+    # Tell the server where its settings file is (inside the container).
+    command: --config /etc/livekit.yaml
+    volumes:
+      # Put our settings file into the container. ":ro" = read-only.
+      - ./infra/livekit/livekit.yaml:/etc/livekit.yaml:ro
+    ports:
+      # "Mac address:Mac port:container port". The 127.0.0.1 part means only YOUR Mac
+      # can connect - not other devices on your Wi-Fi (our dev keys are public).
+      - "127.0.0.1:7880:7880"      # signaling + API (TCP)
+      - "127.0.0.1:7881:7881"      # media, backup path (TCP)
+      - "127.0.0.1:7882:7882/udp"  # media, main path (UDP)
+    healthcheck:
+      # Every 10 seconds, ask the server's front door. It answers "OK" when ready.
+      # wget is included in the image (it is based on Alpine Linux).
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:7880"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    # Start again by itself if it crashes (but not after you run "docker compose down").
+    restart: unless-stopped

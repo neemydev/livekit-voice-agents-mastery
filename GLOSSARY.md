@@ -3,7 +3,7 @@
 Short, simple explanations of the terms, features and ideas used in this project.
 Each entry is 2-3 lines. Grouped by topic, A-Z inside each group.
 
-**Contents:** [Voice AI](#voice-ai) · [LiveKit](#livekit) · [How we work (SDLC)](#how-we-work-sdlc) · [Claude Code](#claude-code) · [Git & GitHub](#git--github) · [Python & tools](#python--tools)
+**Contents:** [Voice AI](#voice-ai) · [LiveKit](#livekit) · [Networking & real-time media](#networking--real-time-media) · [How we work (SDLC)](#how-we-work-sdlc) · [Claude Code](#claude-code) · [Git & GitHub](#git--github) · [Python & tools](#python--tools)
 
 ---
 
@@ -29,6 +29,14 @@ You speak → it becomes text → the LLM replies in text → the reply is spoke
 
 ## LiveKit
 
+### Access token
+A signed "ticket" that lets one participant join one room. It is made with the API key + secret.
+Example: `lk token create --join --room my-first-room --identity user1`.
+
+### Dev mode keys (`devkey` / `secret`)
+LiveKit's standard API key and secret for local testing. Everyone knows them,
+so they are only safe on your own computer, never on a server on the internet.
+
 ### LiveKit
 An open-source platform for real-time audio and video, like the engine behind a video call.
 We use it to carry voice between a person and our AI agent with very little delay.
@@ -44,6 +52,66 @@ It gives you three values for `.env`: `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT
 ### LiveKit CLI (`lk`)
 A command-line tool for LiveKit. You type `lk ...` in the terminal to manage projects, agents and more.
 It is already installed on this Mac.
+
+### LiveKit server
+The program at the center of every call: an SFU that routes audio, video and data between participants.
+You can use LiveKit Cloud's servers, or run your own ("self-host"), e.g. in Docker.
+
+### Participant
+Anything that connects to a room: a person in a browser, a phone caller, or an AI agent.
+LiveKit treats them all the same way. An agent is just another participant.
+
+### Room
+A virtual space where a call happens. Participants join a room to talk to each other.
+Example: room `my-first-room` with participants `you` and `demo-bot`.
+
+### Self-hosting
+Running software on your own machines instead of using a paid hosted service.
+You get full control, but you must set it up, secure it and keep it running.
+
+### Track
+One stream of media inside a room, e.g. your microphone audio or your camera video.
+Participants *publish* their tracks and *subscribe* to other participants' tracks.
+
+---
+
+## Networking & real-time media
+
+### ICE
+The process WebRTC uses to find a working network path between two sides.
+Each side lists addresses it can be reached on ("candidates"), and they try them until one works.
+
+### MCU (Multipoint Control Unit)
+An older way to run group calls: the server decodes everyone's media, mixes it into one stream, and re-encodes it.
+Simple for clients, but slow and very heavy for the server.
+
+### P2P (Peer-to-peer)
+Every participant sends media directly to every other participant, with no server in between.
+Fine for 2 people, but it breaks down quickly: with 5 people, each one uploads 4 copies.
+
+### Port
+A numbered "door" on a computer that a program listens on. One computer has many doors.
+LiveKit uses 7880 (signaling/API), 7881 (media over TCP), 7882 (media over UDP).
+
+### SFU (Selective Forwarding Unit)
+The kind of server LiveKit is. Each participant sends their media **once** to the SFU,
+which **forwards** copies to whoever subscribes, without mixing or re-encoding. Fast and scalable.
+
+### Signaling
+The "setup talk" before and during a call: who you are, which room, which tracks exist.
+It goes over a WebSocket on port 7880. The actual audio/video goes separately (see WebRTC).
+
+### TCP vs UDP
+Two ways to send data. **TCP** re-sends anything lost, so it is reliable but can lag.
+**UDP** never waits for lost packets, so it is fast. Live voice prefers UDP: a late sound is useless anyway.
+
+### WebRTC
+The standard technology browsers and apps use to send live audio/video with very low delay (~10-30 ms transport).
+It mostly uses UDP. LiveKit is built on WebRTC.
+
+### WebSocket
+A connection that stays open so both sides can send messages at any time.
+LiveKit uses it for signaling (`ws://localhost:7880`), not for the audio itself.
 
 ---
 
@@ -136,6 +204,18 @@ You have two: one for work, one for personal. The `github-personal` name picks t
 ### Docker
 A tool that packs an app and everything it needs into a "container", so it runs the same on any computer.
 All four of our projects will run in Docker.
+
+### Docker Compose
+A tool to start several containers together from one file, `docker-compose.yml`.
+`docker compose up -d` starts everything, `docker compose down` stops it.
+
+### Image vs container
+An **image** is the packaged app, like a recipe (e.g. `livekit/livekit-server:v1.13.11`).
+A **container** is a running copy of that image, like the cooked meal. One image can run as many containers.
+
+### Port mapping
+Connecting a port on your Mac to a port inside a container, e.g. `7880:7880`.
+Without it, the container's doors are closed to the outside, even to your own browser.
 
 ### pytest
 Python's most common test tool. It finds files named `test_*.py` and runs the checks inside.

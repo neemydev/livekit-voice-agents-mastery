@@ -46,19 +46,10 @@ Each project is a real voice agent you can talk to. They get harder as the cours
 A voice agent is just another **participant** in a LiveKit **room**.
 You speak, the LiveKit server forwards your audio to the agent, and the agent talks back.
 
-```mermaid
-flowchart LR
-    U["🧑 You<br/>(browser or phone)"] <-->|"audio<br/>WebRTC"| S["📡 LiveKit server<br/>(SFU, in Docker)"]
-    S <-->|"audio<br/>WebRTC"| A
-
-    subgraph A["🤖 Voice agent"]
-        direction LR
-        STT["👂 STT<br/>speech → text"] --> LLM["🧠 LLM<br/>thinks of a reply"] --> TTS["🗣️ TTS<br/>text → speech"]
-    end
-```
-
-- **SFU** (the kind of server LiveKit is): it receives each audio stream once and forwards copies. It never mixes, so it stays fast.
-- **STT → LLM → TTS**: the agent's ears, brain and voice. We use Deepgram / Speechmatics, OpenAI, and more.
+<p align="center">
+  <img src="docs/readme/how-it-works.gif" width="100%"
+       alt="Animation of one voice turn: you speak, the LiveKit server (SFU) forwards your audio to the voice agent, STT turns it into text, the LLM writes a reply, TTS turns the reply into speech, and the server forwards it back to you." />
+</p>
 
 New to these words? See the [glossary](GLOSSARY.md).
 
@@ -121,14 +112,15 @@ Every feature is planned before it is coded, following Anthropic's
 [AI-native SDLC playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook).
 Each step writes a file, and each file is approved before the next step starts.
 
-```mermaid
-flowchart LR
-    I["📝 intent.md<br/>what & why"] --> S["📐 spec.md<br/>how it behaves"] --> P["🗺️ plan.md<br/>files, order, tests"] --> B["💻 code + tests"] --> T["✅ tested"]
-```
+<p align="center">
+  <img src="docs/readme/how-we-build.gif" width="100%"
+       alt="Animation of the five steps: intent.md, spec.md, plan.md, build, tested. Each step unlocks only after you approve the one before it." />
+</p>
 
 ```text
 .
 ├── agents/              # the four voice agents (coming next)
+├── docs/readme/         # README animations + the script that draws them
 ├── infra/livekit/       # local LiveKit server settings
 ├── specs/               # intent → spec → plan for every feature
 ├── tests/               # pytest tests

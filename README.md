@@ -1,43 +1,91 @@
+<div align="center">
+
+<a href="https://livekit.io">
+  <img src="https://github.com/livekit.png?size=240" alt="LiveKit logo" width="120" />
+</a>
+
 # LiveKit Voice Agents Mastery
 
-Learning to build real-time voice AI agents with [LiveKit Agents](https://docs.livekit.io/agents/),
-by building four projects from scratch.
+**Learning to build real-time voice AI agents with [LiveKit](https://livekit.io), one project at a time.**
 
-| Project | What it is | Status |
-|---|---|---|
-| `agents/dental_receptionist/` | A voice receptionist for a dental clinic | Not started |
-| `agents/restaurant/` | A multi-agent restaurant system (greeting, ordering, ...) | Not started |
-| `agents/healthcare/` | A healthcare voice agent | Not started |
-| `agents/contact_center/` | An AI contact center | Not started |
+[![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![LiveKit Agents](https://img.shields.io/badge/LiveKit-Agents-1FD5F9)](https://docs.livekit.io/agents/)
+[![LiveKit server](https://img.shields.io/badge/LiveKit%20server-v1.13.11-1FD5F9)](https://github.com/livekit/livekit)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+[![uv](https://img.shields.io/badge/uv-package%20manager-DE5FE9)](https://docs.astral.sh/uv/)
+[![Tests](https://img.shields.io/badge/tests-pytest-0A9EDC?logo=pytest&logoColor=white)](tests/)
 
-Course followed: [LiveKit Academy](https://www.livekit-academy.com/courses).
+[Projects](#-the-four-projects) ·
+[How it works](#-how-it-works) ·
+[Quick start](#-quick-start) ·
+[Local LiveKit server](#-local-livekit-server) ·
+[How this repo is built](#-how-this-repo-is-built) ·
+[Learning notes](#-learning-notes)
 
-## How this repo is built
+<sub>A personal learning project. Not an official LiveKit project.</sub>
 
-Every feature is planned before it is coded, following Anthropic's
-[AI-native SDLC playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook):
+</div>
 
-1. `intent.md` - what and why
-2. `spec.md` - how it must behave
-3. `plan.md` - files, order of work, and the tests that prove it works
-4. Code + tests
+---
 
-All plans live in [`specs/`](specs/). The learning diary is in [`progress/log.md`](progress/log.md).
+## 🎯 The four projects
 
-## Run it
+Each project is a real voice agent you can talk to. They get harder as the course goes on.
 
-Requirements: Python 3.13, [uv](https://docs.astral.sh/uv/), Docker.
+| | Project | What it is | Status |
+|:---:|---|---|:---:|
+| 🦷 | `agents/dental_receptionist/` | A voice receptionist that books dental appointments | 🔜 Next |
+| 🍽️ | `agents/restaurant/` | A multi-agent restaurant system: greeting, ordering, payment | ⏳ Planned |
+| 🏥 | `agents/healthcare/` | A healthcare voice agent | ⏳ Planned |
+| 📞 | `agents/contact_center/` | An AI-powered contact center | ⏳ Planned |
+
+**Foundation, already built:** ✅ a self-hosted LiveKit server running in Docker ([spec](specs/infra/001-local-livekit-server/)).
+
+## 🧭 How it works
+
+A voice agent is just another **participant** in a LiveKit **room**.
+You speak, the LiveKit server forwards your audio to the agent, and the agent talks back.
+
+```mermaid
+flowchart LR
+    U["🧑 You<br/>(browser or phone)"] <-->|"audio<br/>WebRTC"| S["📡 LiveKit server<br/>(SFU, in Docker)"]
+    S <-->|"audio<br/>WebRTC"| A
+
+    subgraph A["🤖 Voice agent"]
+        direction LR
+        STT["👂 STT<br/>speech → text"] --> LLM["🧠 LLM<br/>thinks of a reply"] --> TTS["🗣️ TTS<br/>text → speech"]
+    end
+```
+
+- **SFU** (the kind of server LiveKit is): it receives each audio stream once and forwards copies. It never mixes, so it stays fast.
+- **STT → LLM → TTS**: the agent's ears, brain and voice. We use Deepgram / Speechmatics, OpenAI, and more.
+
+New to these words? See the [glossary](GLOSSARY.md).
+
+## 🚀 Quick start
+
+You need: **Python 3.13**, **[uv](https://docs.astral.sh/uv/)**, **Docker**, and the **[LiveKit CLI](https://docs.livekit.io/intro/basics/cli.md)** (`lk`).
 
 ```bash
+git clone https://github.com/neemydev/livekit-voice-agents-mastery.git
+cd livekit-voice-agents-mastery
+
 cp .env.example .env      # then fill in your own keys
 uv sync                   # install dependencies
+docker compose up -d      # start the local LiveKit server
 uv run pytest             # run the tests
 ```
 
-## Local LiveKit server
+## 📡 Local LiveKit server
 
 A self-hosted LiveKit server runs in Docker, so no LiveKit Cloud account is needed while learning.
-Settings: [`infra/livekit/livekit.yaml`](infra/livekit/livekit.yaml). Spec: [`specs/infra/001-local-livekit-server/`](specs/infra/001-local-livekit-server/).
+
+| What | Value |
+|---|---|
+| URL | `ws://localhost:7880` |
+| API key / secret | `devkey` / `secret` (public dev keys, for your own computer only) |
+| Ports | `7880` signaling · `7882/udp` media · `7881/tcp` media backup |
+| Settings | [`infra/livekit/livekit.yaml`](infra/livekit/livekit.yaml), every line explained |
 
 ```bash
 docker compose up -d              # start it
@@ -47,10 +95,10 @@ docker compose logs -f livekit    # watch participants and tracks arrive
 docker compose down               # stop it
 ```
 
-Connect with: URL `ws://localhost:7880`, API key `devkey`, API secret `secret`.
-These dev keys are public - fine on your own computer, never on a server on the internet.
+<details>
+<summary><b>🎬 Try real video through your own server</b></summary>
 
-**Try real media** (needs the [LiveKit CLI](https://docs.livekit.io/intro/basics/cli.md), `lk`):
+<br/>
 
 ```bash
 # 1. A demo bot joins room "my-first-room" and streams a demo video
@@ -64,3 +112,43 @@ lk token create --api-key devkey --api-secret secret \
 
 Then open <https://meet.livekit.io/?tab=custom>, enter `ws://localhost:7880` and your token, and join.
 You should see the bot's video.
+
+</details>
+
+## 🛠️ How this repo is built
+
+Every feature is planned before it is coded, following Anthropic's
+[AI-native SDLC playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook).
+Each step writes a file, and each file is approved before the next step starts.
+
+```mermaid
+flowchart LR
+    I["📝 intent.md<br/>what & why"] --> S["📐 spec.md<br/>how it behaves"] --> P["🗺️ plan.md<br/>files, order, tests"] --> B["💻 code + tests"] --> T["✅ tested"]
+```
+
+```text
+.
+├── agents/              # the four voice agents (coming next)
+├── infra/livekit/       # local LiveKit server settings
+├── specs/               # intent → spec → plan for every feature
+├── tests/               # pytest tests
+├── progress/            # learning diary and course tracker
+├── GLOSSARY.md          # every key term, in 2-3 simple lines
+└── docker-compose.yml   # starts everything with one command
+```
+
+## 📚 Learning notes
+
+| | |
+|---|---|
+| 🎓 Main course | [LiveKit Academy](https://www.livekit-academy.com/courses) |
+| 🧪 How we work | [AI-native SDLC playbook](https://academy.claude.com/courses/ai-native-sdlc-playbook) |
+| 📖 Glossary | [`GLOSSARY.md`](GLOSSARY.md) |
+| 📅 Learning diary | [`progress/log.md`](progress/log.md) |
+| ✅ Course tracker | [`progress/course-tracker.md`](progress/course-tracker.md) |
+
+---
+
+<div align="center">
+<sub>Built while learning, by <a href="https://github.com/neemydev">neemydev</a>.</sub>
+</div>

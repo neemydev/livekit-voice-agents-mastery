@@ -1,6 +1,6 @@
 # Plan: Local LiveKit server in Docker
 
-**Status:** Built  <!-- Draft → Approved → Built → Tested --> (approved by user 2026-11-20, built 2026-11-20)
+**Status:** Tested  <!-- Draft → Approved → Built → Tested --> (approved by user 2026-11-20, built 2026-11-20, tested by user 2026-11-20)
 **Date:** 2026-11-20
 **Project:** infra
 **Built from:** spec.md (Approved 2026-11-20)
@@ -114,7 +114,8 @@ starting LiveKit server {"portHttp": 7880, "nodeIP": "127.0.0.1", "version": "1.
 - The API lists `demo-bot` in `my-first-room` with one `VIDEO video/H264` track, not muted.
 - The server log shows the media path it chose: `[local][selected] udp4 host 127.0.0.1:7882`.
   So media flows over the main UDP port, through Docker's port mapping. TCP 7881 was offered as a backup.
-- Still to do by you: see the video in the browser, and two tabs hearing each other. After that, the status becomes `Tested`.
+- **Browser test by the user (2026-11-20):** joined `my-first-room` at meet.livekit.io (custom tab, `ws://localhost:7880`)
+  and saw the demo bot's video, so media flows through our own SFU. Status set to `Tested`.
 
 **What we changed from the plan, and why:**
 - The tests ignore one warning, `InsecureKeyLengthWarning` ("secret is shorter than 32 characters").

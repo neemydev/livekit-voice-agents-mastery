@@ -77,9 +77,17 @@ Participants *publish* their tracks and *subscribe* to other participants' track
 
 ## Networking & real-time media
 
+### Bind address
+Which network address a server listens on. `127.0.0.1` = "only this machine", `0.0.0.0` = "every address".
+Inside a container, LiveKit must listen on `0.0.0.0`, or Docker's port mapping can't reach it.
+
 ### ICE
 The process WebRTC uses to find a working network path between two sides.
 Each side lists addresses it can be reached on ("candidates"), and they try them until one works.
+
+### ICE candidate
+One possible address the media could travel on, e.g. `udp4 127.0.0.1:7882`.
+The server log marks the one that won as `[selected]`. In our test that was UDP port 7882.
 
 ### MCU (Multipoint Control Unit)
 An older way to run group calls: the server decodes everyone's media, mixes it into one stream, and re-encodes it.
@@ -104,6 +112,10 @@ It goes over a WebSocket on port 7880. The actual audio/video goes separately (s
 ### TCP vs UDP
 Two ways to send data. **TCP** re-sends anything lost, so it is reliable but can lag.
 **UDP** never waits for lost packets, so it is fast. Live voice prefers UDP: a late sound is useless anyway.
+
+### UDP mux
+Sending ALL media through **one** UDP port, instead of a range of 10,000 ports (50000-60000).
+Much easier to map in Docker. Ours is port 7882 (`rtc.udp_port` in `livekit.yaml`).
 
 ### WebRTC
 The standard technology browsers and apps use to send live audio/video with very low delay (~10-30 ms transport).
@@ -208,6 +220,10 @@ All four of our projects will run in Docker.
 ### Docker Compose
 A tool to start several containers together from one file, `docker-compose.yml`.
 `docker compose up -d` starts everything, `docker compose down` stops it.
+
+### Health check
+A small test Docker runs every few seconds to ask a container "are you ready?".
+Ours fetches `http://127.0.0.1:7880` and expects `OK`. `docker compose ps` then shows `healthy`.
 
 ### Image vs container
 An **image** is the packaged app, like a recipe (e.g. `livekit/livekit-server:v1.13.11`).

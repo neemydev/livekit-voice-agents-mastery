@@ -67,7 +67,7 @@ Add terms the user asks for. When a new key term comes up, **suggest** adding it
   - Remote: `git@github-personal:neemydev/livekit-voice-agents-mastery.git` (the `github-personal` SSH alias uses the personal key)
   - Commit identity (set locally in this repo): `neemydev <neemydev@gmail.com>`. The global git identity is the work one, so never remove the local setting.
 - `.env` has OpenAI, Deepgram and Speechmatics keys (all tested OK on 2026-11-19).
-- Still needed: `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` from LiveKit Cloud.
+- `.env` also has `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` for LiveKit Cloud project "Learning" (tested OK on 2026-11-22). `lk cloud auth` is done on this Mac.
 
 ## Lessons learned (add a line each time Claude repeats a mistake)
 

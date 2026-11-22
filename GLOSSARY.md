@@ -9,13 +9,25 @@ Each entry is 2-3 lines. Grouped by topic, A-Z inside each group.
 
 ## Voice AI
 
+### Latency budget
+The time allowed from "user stops talking" to "agent starts talking": about 0.5 seconds.
+Each step (network, STT, LLM, TTS) uses part of it. Network time counts twice: there and back.
+
 ### LLM (Large Language Model)
 The "brain" of a voice agent. It reads text and writes a reply.
 Example: OpenAI's GPT models. In a voice agent it sits between STT and TTS.
 
+### Realtime model (speech-to-speech)
+One AI model that hears audio and answers in audio, with no text step in between.
+Example: OpenAI Realtime, Gemini Live. Can be faster, but you can't read or change the text in the middle.
+
 ### STT (Speech-to-Text)
 The "ears" of a voice agent. It turns spoken audio into written text.
 Example: you say "book a cleaning", STT gives the text `book a cleaning`. We have Deepgram and Speechmatics.
+
+### System prompt (instructions)
+The hidden rules the LLM reads before every reply: who it is and how to behave.
+Example: "You are a receptionist at Bright Smile Dental. Keep replies to 1-2 sentences."
 
 ### TTS (Text-to-Speech)
 The "voice" of a voice agent. It turns the LLM's written reply into spoken audio.
@@ -32,6 +44,22 @@ You speak → it becomes text → the LLM replies in text → the reply is spoke
 ### Access token
 A signed "ticket" that lets one participant join one room. It is made with the API key + secret.
 Example: `lk token create --join --room my-first-room --identity user1`.
+
+### Agent (class)
+Defines WHO the agent is: its `instructions` (system prompt), and later its tools.
+Like a job description. Example: `class Receptionist(Agent)` with "You are a friendly receptionist".
+
+### Agent Console
+A LiveKit Cloud web page where you click "Start a session" and talk to your agent.
+It also shows timing and events for each turn. The course calls it the old name, "Playground".
+
+### AgentServer
+The program that stays running and waits for calls, like a clinic with the lights on.
+When a call starts, it runs your `@server.rtc_session` function. One server handles many calls.
+
+### AgentSession
+One live conversation. You plug the ears, brain and mouth into it: `stt=`, `llm=`, `tts=`.
+Each call gets its own session, so two callers never mix.
 
 ### Dev mode keys (`devkey` / `secret`)
 LiveKit's standard API key and secret for local testing. Everyone knows them,
@@ -53,6 +81,10 @@ It gives you three values for `.env`: `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT
 A command-line tool for LiveKit. You type `lk ...` in the terminal to manage projects, agents and more.
 It is already installed on this Mac.
 
+### LiveKit Inference
+AI models (STT, LLM, TTS) run for you by LiveKit Cloud. You don't need a separate key per company.
+Example: `stt="deepgram/nova-3"` as a plain string. Needs LiveKit Cloud keys.
+
 ### LiveKit server
 The program at the center of every call: an SFU that routes audio, video and data between participants.
 You can use LiveKit Cloud's servers, or run your own ("self-host"), e.g. in Docker.
@@ -61,9 +93,17 @@ You can use LiveKit Cloud's servers, or run your own ("self-host"), e.g. in Dock
 Anything that connects to a room: a person in a browser, a phone caller, or an AI agent.
 LiveKit treats them all the same way. An agent is just another participant.
 
+### Plugin (LiveKit)
+A small add-on package that connects LiveKit Agents to one AI company, using your own key.
+Example: `livekit-agents[deepgram]` lets you write `deepgram.STT()`. The other option is LiveKit Inference.
+
 ### Room
 A virtual space where a call happens. Participants join a room to talk to each other.
 Example: room `my-first-room` with participants `you` and `demo-bot`.
+
+### Run modes
+Four ways to start the same agent code: `console` (talk in your terminal, no server),
+`dev` (auto-reloads on save), `start` (production), `connect` (join one room to debug).
 
 ### Self-hosting
 Running software on your own machines instead of using a paid hosted service.
@@ -80,6 +120,10 @@ Participants *publish* their tracks and *subscribe* to other participants' track
 ### Bind address
 Which network address a server listens on. `127.0.0.1` = "only this machine", `0.0.0.0` = "every address".
 Inside a container, LiveKit must listen on `0.0.0.0`, or Docker's port mapping can't reach it.
+
+### Head-of-line blocking
+When one lost packet makes everything behind it wait, like a stalled car blocking a whole lane.
+TCP (and so WebSocket) does this. It causes short freezes in live voice. UDP doesn't.
 
 ### ICE
 The process WebRTC uses to find a working network path between two sides.
@@ -213,6 +257,22 @@ You have two: one for work, one for personal. The `github-personal` name picks t
 `.env` holds your real secret keys. It is never shared or published.
 `.env.example` lists the same key *names* with empty values, so others know which keys they need.
 
+### async / await
+`async def` = "this function may pause in the middle". `await` = "pause here until this is done,
+and let other work run meanwhile". This lets an agent keep listening while it waits for the LLM.
+
+### Class
+A template for making things. `class Receptionist(Agent)` = "a Receptionist is a kind of Agent".
+It keeps the agent's instructions and tools together in one box.
+
+### Coroutine
+What an `async def` function gives back when you call it. It only runs when something `await`s it.
+Forget the `await` and nothing happens, except a warning: "coroutine was never awaited".
+
+### Decorator (`@something`)
+A label on the line above a function that gives it a special job.
+Example: `@server.rtc_session` means "run this function each time a call starts".
+
 ### Docker
 A tool that packs an app and everything it needs into a "container", so it runs the same on any computer.
 All four of our projects will run in Docker.
@@ -229,6 +289,10 @@ Ours fetches `http://127.0.0.1:7880` and expects `OK`. `docker compose ps` then 
 An **image** is the packaged app, like a recipe (e.g. `livekit/livekit-server:v1.13.11`).
 A **container** is a running copy of that image, like the cooked meal. One image can run as many containers.
 
+### Inheritance and `super()`
+A class can take over all abilities of a parent class, then change only what is different.
+`super().__init__(...)` = "parent class, do your normal setup, with these values".
+
 ### Port mapping
 Connecting a port on your Mac to a port inside a container, e.g. `7880:7880`.
 Without it, the container's doors are closed to the outside, even to your own browser.
@@ -236,6 +300,10 @@ Without it, the container's doors are closed to the outside, even to your own br
 ### pytest
 Python's most common test tool. It finds files named `test_*.py` and runs the checks inside.
 Run it with `uv run pytest`.
+
+### Scaffolding
+Making a ready-made starter project with the basic files already in place.
+Example: `lk agent init my-agent --template agent-starter-python`.
 
 ### uv
 A fast tool that installs Python packages and runs Python code for this project.

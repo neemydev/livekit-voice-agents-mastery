@@ -44,9 +44,12 @@ Add terms the user asks for. When a new key term comes up, **suggest** adding it
 ## Commands
 
 - Tests (all): `uv run pytest` · one project: `uv run pytest agents/<project>`
-- Add a package: `uv add <package>` (dev tools: `uv add --dev <package>`)
-- Local LiveKit server (spec `specs/infra/001-local-livekit-server/`): `docker compose up -d` · `docker compose ps` (should say healthy) · `docker compose logs -f livekit` · `docker compose down`
-- LiveKit server tests need the server running; with it off they are skipped, not failed.
+- uv workspace: each agent is a package listed in the root `pyproject.toml` (`[tool.uv.workspace] members`). Add a package to one agent: `uv add --package <name> <package>` · root dev tools: `uv add --dev <package>`
+- Stack (LiveKit server + agents, local mode): `docker compose up -d` · `docker compose ps` (livekit healthy) · `docker compose logs -f <service>` · `docker compose down` · after code changes: `docker compose up -d --build <service>`
+- Cloud mode (same agents, LiveKit Cloud): `docker compose -f docker-compose.yml -f docker-compose.cloud.yml up -d <service>`
+- Talk to an agent on the local server: `lk token create --url ws://localhost:7880 --api-key devkey --api-secret secret --join --room <new-room> --identity patient --agent <agent_name> --open meet` (new room name each time). `lk` defaults to the Cloud project.
+- Console mode (terminal, no server, use headphones): `uv run python -m dental_receptionist.agent console`
+- Tests that need the server, the agent container, or an API key are skipped (not failed) when it is missing.
 
 ## Hooks (always on, in `.claude/settings.json`)
 
@@ -72,3 +75,6 @@ Add terms the user asks for. When a new key term comes up, **suggest** adding it
 ## Lessons learned (add a line each time Claude repeats a mistake)
 
 - Bash commands whose text contains a `.env` path (even inside a heredoc) are blocked. Write such files with the Write tool.
+- Claude cannot set a `plan.md` to `Approved` (it opens the code gate; the safety check blocks it). Save the plan as `Draft` and ask the user to change the Status line.
+- Deepgram's default USA server is slow and unsteady from this network (choppy voice). Use the EU server (`api.eu.deepgram.com`); prove it with the voice speed test.
+- Never run `docker compose config` without `--quiet`: it prints the keys from `.env`.

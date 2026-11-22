@@ -1,0 +1,19 @@
+# CLOUD MODE: run our agents against LiveKit Cloud instead of the local server.
+# Spec: specs/dental_receptionist/001-first-agent/
+#
+# Use it ON TOP of the normal file (the second file's values win):
+#   docker compose -f docker-compose.yml -f docker-compose.cloud.yml up -d dental_receptionist
+# Back to local:
+#   docker compose up -d dental_receptionist
+#
+# ${LIVEKIT_URL} etc. are filled in by Docker Compose from the repo's .env file
+# (your LiveKit Cloud project's values). Careful: if the same name is set in your
+# terminal (for example: export LIVEKIT_URL=...), that value wins over .env.
+# Never run "docker compose config" without --quiet: it would print the keys.
+
+services:
+  dental_receptionist:
+    environment:
+      LIVEKIT_URL: ${LIVEKIT_URL}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}

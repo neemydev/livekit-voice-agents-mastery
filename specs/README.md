@@ -43,4 +43,6 @@ Templates are in `_templates/`. Shortcuts: `/new-spec` (steps 1-2), `/plan` (ste
 A plan is **open** while it is `Approved` or `Built`. The hook only lets code into
 `agents/PROJECT/` while that project has an open plan. `Tested` closes it.
 
-Claude may change a status to `Approved` only after you say yes in the chat.
+Claude may change intent.md and spec.md to `Approved` only after you say yes in the chat.
+For **plan.md, you change the Status to `Approved` yourself**: that status opens the code gate,
+so a human turns the key (Claude's safety check blocks Claude from doing it).

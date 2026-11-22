@@ -1,0 +1,19 @@
+# The dental receptionist agent, as its own small Python package.
+# Spec: specs/dental_receptionist/001-first-agent/
+# It is one "member" of the uv workspace defined in the repo's root pyproject.toml.
+
+[project]
+name = "dental-receptionist"
+version = "0.1.0"
+description = "Bright Smile Dental voice receptionist, built with LiveKit Agents"
+requires-python = ">=3.13"
+# Filled in by: uv add --package dental-receptionist ...
+dependencies = [
+    "livekit-agents[deepgram,openai]~=1.8",
+    "python-dotenv>=1.2.4",
+]
+
+# How to build this package. uv_build finds the code in src/dental_receptionist/.
+[build-system]
+requires = ["uv_build>=0.9.10,<0.10.0"]
+build-backend = "uv_build"

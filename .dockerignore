@@ -1,0 +1,19 @@
+# What Docker may copy into an image when it builds from the repo root.
+# We use an ALLOW LIST: ignore everything first, then allow only what agents need.
+# Safest for secrets: a .env file can never slip into an image by accident.
+
+# 1. Ignore everything...
+*
+
+# 2. ...then allow just these:
+!pyproject.toml
+!uv.lock
+!agents/
+
+# 3. ...but never these, even inside agents/:
+**/tests/
+**/__pycache__/
+**/.venv/
+**/.env
+**/.env.*
+**/*.md

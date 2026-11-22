@@ -1,11 +1,31 @@
+# Root of the repo. It is a uv "workspace": one project made of several small packages.
+# Each agent in agents/ is one package (a "member") with its own pyproject.toml.
+# All members share ONE lock file (uv.lock), so everyone gets the same versions.
+
 [project]
 name = "livekit-voice-agent"
 version = "0.1.0"
 requires-python = ">=3.13"
-dependencies = []
+# The root depends on every agent, so `uv run pytest` here can import and test all of them.
+dependencies = ["dental-receptionist"]
 
 [dependency-groups]
 dev = [
-    "livekit-api>=2.0.1",
+    # Below 2.0: livekit-agents 1.8 needs livekit-api < 2. (Was >=2.0.1 before the agent existed.)
+    "livekit-api>=1.2.0",
     "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
 ]
+
+[tool.uv.workspace]
+# List each agent package here when we add it.
+members = ["agents/dental_receptionist"]
+
+[tool.uv.sources]
+# "dental-receptionist" comes from this workspace, not from the internet (PyPI).
+dental-receptionist = { workspace = true }
+
+[tool.pytest.ini_options]
+# Let pytest run `async def` tests without an extra decorator on each one.
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

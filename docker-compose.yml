@@ -1,6 +1,8 @@
 # Starts everything this repo needs, with one command:   docker compose up -d
 # Stop it again with:                                     docker compose down
-# For now that is just the LiveKit server. Later, our agents join this file too.
+# It starts the LiveKit server and our agents.
+# Cloud mode (agents talk to LiveKit Cloud instead of the local server):
+#   docker compose -f docker-compose.yml -f docker-compose.cloud.yml up -d
 
 services:
   livekit:
@@ -26,4 +28,32 @@ services:
       retries: 3
       start_period: 5s
     # Start again by itself if it crashes (but not after you run "docker compose down").
+    restart: unless-stopped
+
+  # Our first agent: the Bright Smile Dental receptionist.
+  # Spec: specs/dental_receptionist/001-first-agent/
+  dental_receptionist:
+    build:
+      context: .  # the repo root: the uv workspace (pyproject.toml + uv.lock) lives there
+      dockerfile: agents/dental_receptionist/Dockerfile
+    # The AI keys (OPENAI_API_KEY, DEEPGRAM_API_KEY) come from the .env file.
+    # "required: false" = still starts (without keys) if someone cloned the repo with no .env.
+    env_file:
+      - path: .env
+        required: false
+    # Which LiveKit server to use. These LOCAL values win over anything in .env.
+    # (Cloud mode replaces them - see docker-compose.cloud.yml.)
+    environment:
+      LIVEKIT_URL: ws://127.0.0.1:7880
+      LIVEKIT_API_KEY: devkey      # public dev key - local use only
+      LIVEKIT_API_SECRET: secret   # public dev secret - local use only
+    # Share the livekit container's network. Then "127.0.0.1" means the SAME place for
+    # both containers. That matters: the server tells everyone "send audio to 127.0.0.1"
+    # (see infra/livekit/livekit.yaml), and in a separate network the agent would send
+    # its audio to itself. (Ports stay on the livekit service above.)
+    network_mode: "service:livekit"
+    # Start only after the LiveKit server says it is healthy.
+    depends_on:
+      livekit:
+        condition: service_healthy
     restart: unless-stopped

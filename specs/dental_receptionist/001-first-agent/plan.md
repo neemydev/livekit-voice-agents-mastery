@@ -1,6 +1,6 @@
 # Plan: dental_receptionist 001 — first agent (greet and chat)
 
-**Status:** Built  <!-- Draft → Approved → Built → Tested --> (built 2026-11-22; approved by user 2026-11-22)
+**Status:** Tested  (built 2026-11-22; approved by user 2026-11-22)
 **Date:** 2026-11-22
 **Project:** dental_receptionist
 **Built from:** spec.md (Approved 2026-11-22)
@@ -93,12 +93,12 @@ Before writing each line, I check the exact parameter names against the docs / p
 
 - **Command:** `uv run pytest` (all) or `uv run pytest agents/dental_receptionist`
 - **Tests:**
-  - [x] `test_dental_behavior.py::test_greets_as_bright_smile` — "Hello" → a friendly Bright Smile Dental greeting that offers help (LLM judge)
-  - [x] `test_dental_behavior.py::test_does_not_invent_hours` — "What time do you open?" → no specific hours made up
-  - [x] `test_dental_behavior.py::test_does_not_book` — "Book me a cleaning" → says booking isn't available yet; doesn't claim to book
-  - [x] `test_dental_joins_room.py::test_agent_joins_new_room` — dispatch to a fresh room on the local server → an AGENT participant appears within 20 s
-  - [x] `test_dental_voice_speed.py::test_voice_arrives_fast_enough` — (added for the choppy-voice bug) middle of 3 tries: first sound < 1.0 s and faster than real time
-  - [x] Existing `tests/test_hooks.py` + `tests/test_livekit_server.py` still pass
+  - [X] `test_dental_behavior.py::test_greets_as_bright_smile` — "Hello" → a friendly Bright Smile Dental greeting that offers help (LLM judge)
+  - [X] `test_dental_behavior.py::test_does_not_invent_hours` — "What time do you open?" → no specific hours made up
+  - [X] `test_dental_behavior.py::test_does_not_book` — "Book me a cleaning" → says booking isn't available yet; doesn't claim to book
+  - [X] `test_dental_joins_room.py::test_agent_joins_new_room` — dispatch to a fresh room on the local server → an AGENT participant appears within 20 s
+  - [X] `test_dental_voice_speed.py::test_voice_arrives_fast_enough` — (added for the choppy-voice bug) middle of 3 tries: first sound < 1.0 s and faster than real time
+  - [X] Existing `tests/test_hooks.py` + `tests/test_livekit_server.py` still pass
 - **Manual checks (you):** console mode chat; local voice test with Meet (hear the greeting, 3-turn chat,
   watch `docker compose logs -f dental_receptionist`); the same voice test on Cloud.
 
@@ -122,11 +122,13 @@ $ uv run pytest            (whole repo, run 3 times)
 ```
 
 Red before green (tests first):
+
 - Behavior tests before `agent.py` existed: `ModuleNotFoundError: No module named 'dental_receptionist.agent'`.
 - Voice speed test with Deepgram's USA server: `first sound took 1.59s (limit 1.0s)`, 0.2x real time.
   After the 3-try change, re-checked against the USA server in memory: middle try 1.31 s → still FAILS, as it should.
 
 Manual checks (by the user):
+
 - Console mode: works; first try had choppy voice (→ Deepgram EU fix) and speaker→mic echo (→ use headphones).
 - Local voice test, Meet + local server in Docker: greeting heard, voice clear, call ended cleanly.
 - Cloud voice test (`docker-compose.cloud.yml`): agent registered at `wss://learning-….livekit.cloud`, joined `dental-cloud-1`, call ended cleanly. Switched back to local afterwards.

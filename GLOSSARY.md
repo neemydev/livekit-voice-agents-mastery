@@ -3,11 +3,15 @@
 Short, simple explanations of the terms, features and ideas used in this project.
 Each entry is 2-3 lines. Grouped by topic, A-Z inside each group.
 
-**Contents:** [Voice AI](#voice-ai) · [LiveKit](#livekit) · [Networking & real-time media](#networking--real-time-media) · [How we work (SDLC)](#how-we-work-sdlc) · [Claude Code](#claude-code) · [Git & GitHub](#git--github) · [Python & tools](#python--tools)
+**Contents:** [Voice AI](#voice-ai) · [LiveKit](#livekit) · [Networking & real-time media](#networking--real-time-media) · [Docker](#docker) · [How we work (SDLC)](#how-we-work-sdlc) · [Claude Code](#claude-code) · [Git & GitHub](#git--github) · [Python & tools](#python--tools)
 
 ---
 
 ## Voice AI
+
+### Echo cancellation
+Removing the agent's own voice from the microphone sound. Without it, the agent hears itself
+through your speakers and answers itself. Browsers do it for you. In console mode, use headphones.
 
 ### Latency budget
 The time allowed from "user stops talking" to "agent starts talking": about 0.5 seconds.
@@ -53,6 +57,10 @@ Like a job description. Example: `class Receptionist(Agent)` with "You are a fri
 A LiveKit Cloud web page where you click "Start a session" and talk to your agent.
 It also shows timing and events for each turn. The course calls it the old name, "Playground".
 
+### Agent dispatch
+Sending an agent into a room. We name our agent (`agent_name="dental-receptionist"`) and ask for it by name.
+Two ways: inside the token (`lk token create --agent ...`, new rooms only) or with an API call.
+
 ### AgentServer
 The program that stays running and waits for calls, like a clinic with the lights on.
 When a call starts, it runs your `@server.rtc_session` function. One server handles many calls.
@@ -88,6 +96,10 @@ Example: `stt="deepgram/nova-3"` as a plain string. Needs LiveKit Cloud keys.
 ### LiveKit server
 The program at the center of every call: an SFU that routes audio, video and data between participants.
 You can use LiveKit Cloud's servers, or run your own ("self-host"), e.g. in Docker.
+
+### node_ip
+The address LiveKit tells callers: "send your audio here". Set in `livekit.yaml`; ours is `127.0.0.1`.
+That only works for callers who share the same `127.0.0.1`. That's why our agent shares livekit's network.
 
 ### Participant
 Anything that connects to a room: a person in a browser, a phone caller, or an AI agent.
@@ -133,6 +145,10 @@ Each side lists addresses it can be reached on ("candidates"), and they try them
 One possible address the media could travel on, e.g. `udp4 127.0.0.1:7882`.
 The server log marks the one that won as `[selected]`. In our test that was UDP port 7882.
 
+### localhost (`127.0.0.1`)
+Means "this same machine". Each container has its **own** localhost.
+So `127.0.0.1` inside the agent container is not the livekit container, unless they share a network.
+
 ### MCU (Multipoint Control Unit)
 An older way to run group calls: the server decodes everyone's media, mixes it into one stream, and re-encodes it.
 Simple for clients, but slow and very heavy for the server.
@@ -149,9 +165,9 @@ LiveKit uses 7880 (signaling/API), 7881 (media over TCP), 7882 (media over UDP).
 The kind of server LiveKit is. Each participant sends their media **once** to the SFU,
 which **forwards** copies to whoever subscribes, without mixing or re-encoding. Fast and scalable.
 
-### Signaling
-The "setup talk" before and during a call: who you are, which room, which tracks exist.
-It goes over a WebSocket on port 7880. The actual audio/video goes separately (see WebRTC).
+### Signaling vs media
+**Signaling** = the "setup talk": who you are, which room, which tracks exist. WebSocket, port 7880.
+**Media** = the actual audio/video. WebRTC, mostly UDP port 7882. Two separate roads, and both must work.
 
 ### TCP vs UDP
 Two ways to send data. **TCP** re-sends anything lost, so it is reliable but can lag.
@@ -168,6 +184,54 @@ It mostly uses UDP. LiveKit is built on WebRTC.
 ### WebSocket
 A connection that stays open so both sides can send messages at any time.
 LiveKit uses it for signaling (`ws://localhost:7880`), not for the audio itself.
+
+---
+
+## Docker
+
+### Build cache (layers)
+Each Dockerfile step makes a saved "layer". If a step and all steps before it didn't change, Docker reuses it.
+That's why we install packages BEFORE copying our code: a code change doesn't reinstall everything.
+
+### Build context
+The folder Docker can see while building. Ours is the repo root (`context: .`), so it can copy `uv.lock`.
+`.dockerignore` hides the rest, e.g. `.env` and tests, so secrets never get into the image.
+
+### Compose override file
+A second compose file that changes a few settings of the first one. The later file wins.
+Ours: `docker-compose.cloud.yml` swaps the LiveKit URL and keys to Cloud, with no code change.
+
+### Docker
+A tool that packs an app and everything it needs into a "container", so it runs the same on any computer.
+All four of our projects will run in Docker.
+
+### Docker Compose
+A tool to start several containers together from one file, `docker-compose.yml`.
+`docker compose up -d` starts everything, `docker compose down` stops it.
+
+### Health check
+A small test Docker runs every few seconds to ask a container "are you ready?".
+Ours fetches `http://127.0.0.1:7880` and expects `OK`. `docker compose ps` then shows `healthy`.
+
+### Image vs container
+An **image** is the packaged app, like a recipe (e.g. `livekit/livekit-server:v1.13.11`).
+A **container** is a running copy of that image, like the cooked meal. One image can run as many containers.
+
+### Multi-stage build
+A Dockerfile in two parts. The **build** stage has compilers and tools. The **final** stage copies only the finished `.venv`.
+The tools are left behind, so the final image is smaller and safer.
+
+### Network namespace
+A container's private "network world": its own localhost, its own ports, its own IP address.
+Normally each container has its own. `network_mode: "service:livekit"` makes two containers share one.
+
+### Port mapping
+Connecting a port on your Mac to a port inside a container, e.g. `7880:7880`.
+Without it, the container's doors are closed to the outside, even to your own browser.
+
+### Shared network (`network_mode: "service:..."`)
+One container moves into another container's network namespace, like two people living in one house.
+Our agent shares livekit's, so `127.0.0.1:7880` reaches the server and the audio address (`node_ip`) works.
 
 ---
 
@@ -273,38 +337,38 @@ Forget the `await` and nothing happens, except a warning: "coroutine was never a
 A label on the line above a function that gives it a special job.
 Example: `@server.rtc_session` means "run this function each time a call starts".
 
-### Docker
-A tool that packs an app and everything it needs into a "container", so it runs the same on any computer.
-All four of our projects will run in Docker.
-
-### Docker Compose
-A tool to start several containers together from one file, `docker-compose.yml`.
-`docker compose up -d` starts everything, `docker compose down` stops it.
-
-### Health check
-A small test Docker runs every few seconds to ask a container "are you ready?".
-Ours fetches `http://127.0.0.1:7880` and expects `OK`. `docker compose ps` then shows `healthy`.
-
-### Image vs container
-An **image** is the packaged app, like a recipe (e.g. `livekit/livekit-server:v1.13.11`).
-A **container** is a running copy of that image, like the cooked meal. One image can run as many containers.
+### Flaky test
+A test that sometimes passes and sometimes fails with no code change, e.g. because the network is a bit random.
+Fix the cause, or measure smarter (like the median). Never just delete the check.
 
 ### Inheritance and `super()`
 A class can take over all abilities of a parent class, then change only what is different.
 `super().__init__(...)` = "parent class, do your normal setup, with these values".
 
-### Port mapping
-Connecting a port on your Mac to a port inside a container, e.g. `7880:7880`.
-Without it, the container's doors are closed to the outside, even to your own browser.
+### Median
+The middle value after sorting. Tries 0.7 s, 0.8 s, 2.5 s → median **0.8 s**.
+One unlucky try doesn't move it, unlike the average (1.33 s). Our voice speed test uses it.
 
 ### pytest
 Python's most common test tool. It finds files named `test_*.py` and runs the checks inside.
 Run it with `uv run pytest`.
 
+### pytest fixture
+A setup step pytest runs around a test. Code before `yield` runs first, code after `yield` runs at the end.
+Ours opens the web connection pool the plugins need. `autouse=True` = use it for every test in the file.
+
 ### Scaffolding
 Making a ready-made starter project with the basic files already in place.
 Example: `lk agent init my-agent --template agent-starter-python`.
 
+### src layout
+Putting a package's code inside a `src/` folder: `agents/dental_receptionist/src/dental_receptionist/`.
+The outer folder is the project, the inner one is the Python package. Tests then use the installed code, as Docker does.
+
 ### uv
 A fast tool that installs Python packages and runs Python code for this project.
 `uv add <package>` installs a package, `uv run <file>` runs code with the right packages.
+
+### uv workspace
+One repo holding several Python packages that share one `uv.lock`. The root `pyproject.toml` lists them.
+Each agent is one package. Docker installs only the one it needs (`uv sync --package dental-receptionist`).

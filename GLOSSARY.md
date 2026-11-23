@@ -293,6 +293,10 @@ They live in `.claude/commands/`.
 
 ## Git & GitHub
 
+### Branch
+A separate line of work in your repo. Changes on a branch don't touch `main` until you merge them.
+We make one branch per feature, named like its spec folder, e.g. `dental_receptionist/002-clinic-facts`.
+
 ### Commit
 A saved snapshot of your files at one moment, with a message saying what changed.
 You can always go back to an earlier commit. In this project, you commit, not Claude.
@@ -300,6 +304,10 @@ You can always go back to an earlier commit. In this project, you commit, not Cl
 ### Force push
 Replacing the history on GitHub with your local history (`git push --force-with-lease`).
 Only needed after rewriting a commit. Risky on shared repos, so use it rarely.
+
+### Pull Request (PR)
+A GitHub page that asks "please merge my branch into `main`". It shows every change in one place.
+You read it, then click "Merge". Later, GitHub can also run our tests on it automatically.
 
 ### Push
 Sending your local commits up to GitHub (`git push`).

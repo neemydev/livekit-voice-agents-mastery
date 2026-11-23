@@ -35,6 +35,29 @@ Small fixes may use a folder with only `plan.md`.
 
 Templates are in `_templates/`. Shortcuts: `/new-spec` (steps 1-2), `/plan` (step 3 onwards).
 
+## Branches
+
+Each feature gets its own git branch, named like its spec folder. No `develop` branch.
+`main` always holds finished, working code.
+
+```bash
+# Start (before /new-spec writes anything)
+git switch main
+git pull
+git switch -c dental_receptionist/002-clinic-facts
+
+# Work: intent → spec → plan → build → test. Commit on this branch.
+
+# Finish (after plan.md is Tested)
+git push -u origin dental_receptionist/002-clinic-facts
+#   → on GitHub: open a Pull Request, read the changes, click "Merge"
+git switch main
+git pull
+git branch -d dental_receptionist/002-clinic-facts
+```
+
+You make the commits, push, and merge. Claude reminds you of these steps.
+
 ## Status words
 
 - intent.md and spec.md: `Draft` → `Approved`

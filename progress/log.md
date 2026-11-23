@@ -4,6 +4,34 @@ Newest entry at the top. Each entry: what we did, what we learned, what is next.
 
 ---
 
+## 2026-11-23 — First voice agent: dental receptionist 001
+
+**Done**
+- Lessons: Voice AI Foundations chapters 1 (what is voice AI) and 2 (project setup).
+- Wrote intent, spec and plan for `specs/dental_receptionist/001-first-agent/`. The plan is now **Tested**.
+- Built the agent: Deepgram ears and mouth, OpenAI brain (`gpt-5.4-mini`), local turn detector.
+- It greets callers as Bright Smile Dental. It doesn't make up hours or bookings.
+- Runs in Docker next to my own LiveKit server. One extra compose file switches it to LiveKit Cloud.
+- Talked to it 3 ways: console (terminal), local server (Meet page), LiveKit Cloud.
+- Tests: 5 new (3 behavior, 1 voice speed, 1 joins a room). Full run: 33 passed.
+- Added about 40 glossary terms, and a new Docker group.
+
+**Learned**
+- Each call is a "job" that runs in its own process. `async`/`await` lets one call listen while it waits for the LLM.
+- Choppy voice was the network, not the code: Deepgram's USA server was too slow from here. The EU server fixed it.
+- A speed test proves the fix. Using the median of 3 tries stops one unlucky try from failing it.
+- Each container has its own `127.0.0.1`. The agent shares livekit's network, so the audio address works.
+- Multi-stage build + `.dockerignore`: a smaller image, with no `.env` inside.
+- An LLM judge test fails when the intent is unclear. Make the intent clearer; don't make the check weaker.
+- Use headphones in console mode, or the agent hears itself and answers itself.
+
+**Next**
+- `/lesson voice-ai-foundations` chapter 3: Understanding AgentSession.
+- Then spec 002: give the receptionist real clinic facts (hours, prices).
+- Later: Postgres + pgvector in the same compose file, when the agent needs a database.
+
+---
+
 ## 2026-11-20 — Self-hosted LiveKit server running in Docker
 
 **Done**

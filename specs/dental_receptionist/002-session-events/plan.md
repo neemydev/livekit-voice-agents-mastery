@@ -1,6 +1,6 @@
 # Plan: dental_receptionist 002 — see what the agent is doing (session events)
 
-**Status:** `Built`   (built 2026-11-25; plan approved by user 2026-11-25)
+**Status:** Tested   (built 2026-11-25; plan approved by user 2026-11-25)
 **Project:** dental_receptionist · **Built from:** spec.md (Approved 2026-11-25) · Branch: `main` (branches paused)
 
 ## Context
@@ -118,6 +118,7 @@ docker compose logs -f --no-log-prefix dental_receptionist \
 ## After building (filled in at the end)
 
 ### Red before green
+
 - `test_call_logger.py` → `ModuleNotFoundError: No module named 'dental_receptionist.call_logger'`
 - `test_dental_stt.py` → `AssertionError` (keyterm list had no "Bright Smile Dental")
 
@@ -142,6 +143,7 @@ tests/test_livekit_server.py ...                                         [100%]
 ```
 
 ### Docker check
+
 - `docker compose up -d --build dental_receptionist` → `registered worker`.
 - `test_dental_joins_room.py` passed, and the watch command showed `[call]` lines from the container
   (`session started in room pytest-dental-…`, `agent: initializing -> listening`). Logger level was fine; no change needed.
@@ -195,4 +197,5 @@ Still to check by hand: the spelling of "Bright Smile Dental" in a `CALLER said`
 and the user's prediction vs. the real lines.
 
 ### What we changed from the plan, and why
+
 - Nothing in the code. The watch command got `--since 1s` for live calls, so old lines from earlier tests are hidden.

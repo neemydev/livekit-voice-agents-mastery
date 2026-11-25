@@ -45,6 +45,28 @@ lk token create --url ws://localhost:7880 --api-key devkey --api-secret secret \
 uv run python -m dental_receptionist.agent console
 ```
 
+## Watch a call
+
+The agent logs one `[call] ...` line for each thing that happens (states, what was said, timing,
+why the call ended). In Docker, LiveKit prints logs as JSON; this command shows only our lines, as plain text:
+
+```bash
+docker compose logs -f --no-log-prefix dental_receptionist \
+  | jq -R -r 'fromjson? | select((.message // "") | startswith("[call]")) | .message'
+```
+
+Example:
+
+```text
+[call] agent: listening -> thinking
+[call] CALLER said: "Is this Bright Smile Dental?"
+[call] AGENT said: "Yes, this is Bright Smile Dental. How can I help?"
+[call] timing: replied 0.84 s after you stopped (llm first word 0.41 s, voice first sound 0.22 s)
+[call] session closed: participant_disconnected
+```
+
+The code is in `src/dental_receptionist/call_logger.py` (spec 002).
+
 ## Switch to LiveKit Cloud
 
 The same agent, no code change. Only the three `LIVEKIT_*` values change (taken from `.env`):
@@ -69,6 +91,8 @@ uv run pytest agents/dental_receptionist
 | `test_dental_behavior.py` | greets as Bright Smile; doesn't invent hours; doesn't fake a booking | `OPENAI_API_KEY` |
 | `test_dental_voice_speed.py` | voice arrives fast enough (first sound < 1 s, faster than real time) | `DEEPGRAM_API_KEY` |
 | `test_dental_joins_room.py` | the agent in Docker joins a new room on the local server | `docker compose up -d` |
+| `test_call_logger.py` | each event makes the right `[call]` line; one text turn really logs them | the last test: `OPENAI_API_KEY` |
+| `test_dental_stt.py` | the ears know "Bright Smile Dental" (keyterm) | nothing |
 
 Tests whose needs are missing are **skipped**, not failed.
 

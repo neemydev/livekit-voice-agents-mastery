@@ -21,6 +21,8 @@ from livekit.agents import (
 )
 from livekit.plugins import deepgram, openai
 
+from dental_receptionist.call_logger import attach_call_logger
+
 # Read the API keys from the repo's .env file (if there is one) into the environment.
 # Inside Docker there is no .env file; Docker Compose passes the keys in instead.
 load_dotenv()
@@ -62,10 +64,19 @@ def build_llm() -> openai.responses.LLM:
 DEEPGRAM_HOST = "api.eu.deepgram.com"
 
 
+# Special words the ears should listen for, so they get spelled right
+# ("Bright Smile Dental", not "bright mile dental"). Nova-3 calls this "keyterm"
+# (the older "keywords" setting is for Nova-2 only). Spec 002. Proof: tests/test_dental_stt.py
+CLINIC_KEYTERMS = ["Bright Smile Dental"]
+
+
 def build_stt() -> deepgram.STT:
     """The ears: speech -> text."""
     return deepgram.STT(
-        model="nova-3", language="en", base_url=f"https://{DEEPGRAM_HOST}/v1/listen"
+        model="nova-3",
+        language="en",
+        keyterm=CLINIC_KEYTERMS,
+        base_url=f"https://{DEEPGRAM_HOST}/v1/listen",
     )
 
 
@@ -100,6 +111,10 @@ async def entrypoint(ctx: JobContext) -> None:
             turn_detection=inference.TurnDetector(version="v1-mini"),
         ),
     )
+
+    # Watch the call: log one "[call] ..." line per event (states, what was said, timing,
+    # why it ended). Switched on BEFORE start, so we also see the first "initializing" state.
+    attach_call_logger(session, room_name=ctx.room.name)
 
     # Join the room as a participant and start listening (this starts the background jobs).
     await session.start(room=ctx.room, agent=Receptionist())

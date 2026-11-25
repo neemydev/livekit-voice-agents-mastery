@@ -13,6 +13,18 @@ Each entry is 2-3 lines. Grouped by topic, A-Z inside each group.
 Removing the agent's own voice from the microphone sound. Without it, the agent hears itself
 through your speakers and answers itself. Browsers do it for you. In console mode, use headphones.
 
+### Endpointing
+Deciding the exact moment the caller's turn has ended, so the agent can start its reply.
+It uses a wait time after the speech stops: too short cuts people off, too long feels slow.
+
+### Interruption (barge-in)
+The caller talks while the agent is speaking. The agent notices (through VAD) and stops talking.
+This makes a voice agent feel like a person, not like a recording you must wait for.
+
+### Keyterm prompting
+Telling the STT in advance about special words, so it hears them correctly.
+Example: `keyterm=["Bright Smile Dental", "Dr. Chen"]` on Deepgram Nova-3, so you don't get "bright mile dental".
+
 ### Latency budget
 The time allowed from "user stops talking" to "agent starts talking": about 0.5 seconds.
 Each step (network, STT, LLM, TTS) uses part of it. Network time counts twice: there and back.
@@ -36,6 +48,14 @@ Example: "You are a receptionist at Bright Smile Dental. Keep replies to 1-2 sen
 ### TTS (Text-to-Speech)
 The "voice" of a voice agent. It turns the LLM's written reply into spoken audio.
 Without TTS the agent could think, but not talk.
+
+### Turn detection
+Deciding if the caller is really finished, not just pausing to think. It sits on top of VAD.
+Ours, `TurnDetector(v1-mini)`, also reads the words: "I'd like to book…" sounds unfinished, so it waits.
+
+### VAD (Voice Activity Detection)
+A small, fast model that answers one question about 30 times a second: "is someone speaking right now?"
+In LiveKit 1.8 every AgentSession gets a Silero VAD by default. It runs on your own computer.
 
 ### Voice pipeline
 The chain a voice agent runs on every turn: **STT → LLM → TTS**.
@@ -61,6 +81,10 @@ It also shows timing and events for each turn. The course calls it the old name,
 Sending an agent into a room. We name our agent (`agent_name="dental-receptionist"`) and ask for it by name.
 Two ways: inside the token (`lk token create --agent ...`, new rooms only) or with an API call.
 
+### Agent state / user state
+What each side is doing right now. Agent: `initializing`, `idle`, `listening`, `thinking`, `speaking`.
+User: `speaking`, `listening`, `away` (silent for 15 s). One turn: user speaking → agent thinking → agent speaking.
+
 ### AgentServer
 The program that stays running and waits for calls, like a clinic with the lights on.
 When a call starts, it runs your `@server.rtc_session` function. One server handles many calls.
@@ -72,6 +96,10 @@ Each call gets its own session, so two callers never mix.
 ### Dev mode keys (`devkey` / `secret`)
 LiveKit's standard API key and secret for local testing. Everyone knows them,
 so they are only safe on your own computer, never on a server on the internet.
+
+### Event (listener)
+A message the session sends when something happens, like "the agent started thinking".
+`@session.on("agent_state_changed")` runs your function each time. Keep that function quick: print or save, nothing slow.
 
 ### LiveKit
 An open-source platform for real-time audio and video, like the engine behind a video call.

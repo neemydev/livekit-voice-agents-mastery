@@ -6,7 +6,7 @@ argument-hint: <project>/<NNN-feature>
 Work item: $ARGUMENTS  (folder: `specs/$ARGUMENTS/`)
 
 1. Check that `intent.md` and `spec.md` in that folder both say `Approved`. If not, stop and tell the user.
-   Check the branch (`git branch --show-current`). If it is `main`, stop: give the "Start" commands from
+   Check the branch (`git branch --show-current`), unless CLAUDE.md says branches are PAUSED. If it is `main`, stop: give the "Start" commands from
    `specs/README.md` (Branches), with the branch named `$ARGUMENTS`.
 2. Enter plan mode (read-only). Read the spec, the existing code in `agents/<project>/`, and the LiveKit docs (livekit-docs MCP).
 3. Propose the plan using the sections of `specs/_templates/plan.md`: files that change, order of work, risks, proof.

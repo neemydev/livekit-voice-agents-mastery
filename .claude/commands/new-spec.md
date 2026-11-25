@@ -10,7 +10,7 @@ If the project is not clear, ask which one.
 
 **Stage 1 - intent.md**
 1. Pick the next number inside `specs/<project>/` (001, 002, ...) and a short feature name (lowercase, dashes).
-   **Branch check:** run `git branch --show-current`. If it is not `<project>/<NNN>-<feature>`, give the user
+   **Branch check** (skip it while CLAUDE.md says branches are PAUSED): run `git branch --show-current`. If it is not `<project>/<NNN>-<feature>`, give the user
    the "Start" commands from `specs/README.md` (Branches) with this name, and wait until they have run them.
 2. Ask the user a few simple questions, one at a time, like an analyst: problem, outcome, who uses it, what they want to learn, limits.
 3. Copy `specs/_templates/intent.md` to `specs/<project>/<NNN>-<feature>/intent.md` and fill it in with their words. Status: `Draft`.

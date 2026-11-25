@@ -34,7 +34,8 @@ Set a status to `Approved` only after the user says yes in the chat. Details: `s
 - **LiveKit docs, not memory.** Use the `livekit-docs` MCP server and the `livekit-agents` skill before writing LiveKit code. Check Docker setup against the docs too.
 - **Proof before "done".** Run the tests and show the output. A bug fix starts with a failing test.
 - **Git: the user commits, not Claude.** Never run `git commit` or `git push`. At the end of a piece of work, give the user a ready-to-copy commit message. Never add `Co-Authored-By` or any Claude/AI attribution.
-- **Branches: one per feature, no `develop`.** Each spec gets a branch named like its folder,
+- **Branches: one per feature, no `develop`.** ⏸ **PAUSED** (user, 2026-11-25): work on `main` and skip
+  the branch checks until the user says to start using branches. When on: each spec gets a branch named like its folder,
   e.g. `dental_receptionist/002-clinic-facts`, made from the latest `main`. Never build on `main`.
   Finished work goes to `main` through a Pull Request that the user merges. Steps: `specs/README.md`.
 - **Secrets.** Never read, print or change `.env`. Code loads it with python-dotenv. New key names go in `.env.example` (empty values).
@@ -52,6 +53,7 @@ Add terms the user asks for. When a new key term comes up, **suggest** adding it
 - Cloud mode (same agents, LiveKit Cloud): `docker compose -f docker-compose.yml -f docker-compose.cloud.yml up -d <service>`
 - Talk to an agent on the local server: `lk token create --url ws://localhost:7880 --api-key devkey --api-secret secret --join --room <new-room> --identity patient --agent <agent_name> --open meet` (new room name each time). `lk` defaults to the Cloud project.
 - Console mode (terminal, no server, use headphones): `uv run python -m dental_receptionist.agent console`
+- Watch a call (only the `[call]` lines; Docker logs are JSON): `docker compose logs -f --no-log-prefix dental_receptionist | jq -R -r 'fromjson? | select((.message // "") | startswith("[call]")) | .message'`
 - Tests that need the server, the agent container, or an API key are skipped (not failed) when it is missing.
 
 ## Hooks (always on, in `.claude/settings.json`)

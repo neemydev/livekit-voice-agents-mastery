@@ -34,6 +34,8 @@ Set a status to `Approved` only after the user says yes in the chat. Details: `s
 - **LiveKit docs, not memory.** Use the `livekit-docs` MCP server and the `livekit-agents` skill before writing LiveKit code. Check Docker setup against the docs too.
 - **Proof before "done".** Run the tests and show the output. A bug fix starts with a failing test.
 - **Git: the user commits, not Claude.** Never run `git commit` or `git push`. At the end of a piece of work, give the user a ready-to-copy commit message. Never add `Co-Authored-By` or any Claude/AI attribution.
+  **One commit per spec, only when its plan.md is `Tested` end to end.** No separate commits for docs-only edits
+  (glossary, progress log, CLAUDE.md, commands): they wait and go into the next spec's commit.
 - **Branches: one per feature, no `develop`.** ⏸ **PAUSED** (user, 2026-11-25): work on `main` and skip
   the branch checks until the user says to start using branches. When on: each spec gets a branch named like its folder,
   e.g. `dental_receptionist/002-clinic-facts`, made from the latest `main`. Never build on `main`.

@@ -20,6 +20,7 @@ from livekit.agents import (
     inference,
 )
 from livekit.plugins import deepgram, openai
+from openai.types.shared_params import Reasoning
 
 from dental_receptionist.call_logger import attach_call_logger
 
@@ -46,14 +47,17 @@ What you can and cannot do yet:
   Say that booking isn't available yet.
 """
 
-# The brain. A small, current OpenAI model. For this model the plugin turns
-# "thinking" off by default (reasoning effort "none"), which keeps replies fast.
-LLM_MODEL = "gpt-5.4-mini"
+# The brain. gpt-6-luna with hidden "thinking" (reasoning) switched OFF: a receptionist
+# doesn't need to reason before saying "we open at 9", and thinking costs time.
+# We must set it ourselves: our plugin version only knows to turn thinking off for older
+# models (like gpt-5.4-mini). Measured 2026-11-25, first word, later turns of one call:
+# gpt-5.4-mini 0.86 s, gpt-6-luna with thinking 1.31 s, gpt-6-luna without thinking 0.67 s.
+LLM_MODEL = "gpt-6-luna"
 
 
 def build_llm() -> openai.responses.LLM:
     """Make the LLM. One function, so the agent and the tests always use the same brain."""
-    return openai.responses.LLM(model=LLM_MODEL)
+    return openai.responses.LLM(model=LLM_MODEL, reasoning=Reasoning(effort="none"))
 
 
 # Which Deepgram server to use for the ears (STT) and the mouth (TTS).

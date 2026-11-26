@@ -4,6 +4,34 @@ Newest entry at the top. Each entry: what we did, what we learned, what is next.
 
 ---
 
+## 2026-11-25 — Watching a call: dental receptionist 002 (session events)
+
+**Done**
+- Lesson: Voice AI Foundations chapter 3, Understanding AgentSession.
+- Wrote intent, spec and plan for `specs/dental_receptionist/002-session-events/`. The plan is now **Tested**.
+- New `call_logger.py`: one `[call]` line per event (states, what was said, reply timing, why the call ended).
+- The ears now know the clinic name: `keyterm=["Bright Smile Dental"]`.
+- One command shows only the `[call]` lines from Docker's JSON logs (with `jq`).
+- Tests: 11 new, red first, then green. Full run: 44 passed.
+- Real call on the local server: every kind of line showed up.
+- Rules: one branch per feature (now paused, we work on `main`). One commit per spec, only when Tested.
+- Glossary: chapter 3 terms (VAD, turn detection, events, states, ...), plus branch and pull request.
+
+**Learned**
+- A session lives in 4 stages: created → started → running → closed. Cleanup is automatic.
+- In LiveKit 1.8 every session gets a Silero VAD for free. The course still says to add it by hand.
+- VAD only hears "voice or not". The turn detector decides if you're really done.
+- Keep event handlers thin. Put the logic in plain functions, so tests can check them without a call.
+- Agent states fire even in a text-only test; user states need a microphone.
+- A noisy room makes VAD say "speaking" while STT finds no words. Fix later: noise cancellation (ch. 7).
+- The logger found a real problem: the brain takes 2.0-2.5 s for its first word. Budget: 0.5 s.
+
+**Next**
+- Spec 003: faster replies. Start with a failing speed test for the LLM's first word.
+- Then `/lesson voice-ai-foundations` chapter 4: writing great agent instructions.
+
+---
+
 ## 2026-11-23 — First voice agent: dental receptionist 001
 
 **Done**

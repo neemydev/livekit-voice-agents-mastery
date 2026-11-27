@@ -10,7 +10,7 @@ Mark `[x]` when a course is done. Add the spec number we built for it, if any.
 - [ ] Competitive Landscape — `competitive-landscape`
 
 ## Track 1: Foundations
-- [ ] Voice AI Foundations — `voice-ai-foundations` (in progress: chapters 1-3 of 13 done, built specs `dental_receptionist/001`, `002`)
+- [ ] Voice AI Foundations — `voice-ai-foundations` (in progress: chapters 1-4 of 13 done, built specs `dental_receptionist/001`-`004`)
 - [ ] Agent Frontends — `your-first-frontend`
 - [ ] Connect to the Phone Network — `connect-to-phones`
 

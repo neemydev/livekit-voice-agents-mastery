@@ -1,14 +1,19 @@
 # Dental receptionist (Bright Smile Dental)
 
-A voice agent that answers calls for a dental clinic. Feature 001: it says hello first and chats
-in short replies. It does **not** book anything or know clinic facts yet (later features).
+A voice agent that answers calls for a dental clinic. Her name is **Maya**. She speaks first,
+answers questions about the clinic's hours, address, services and dentists in short spoken replies,
+and follows guardrails (no medical advice, no other patients' details, no made-up facts).
+She can **not** book appointments yet (tools come in a later feature).
 
-Spec: [`specs/dental_receptionist/001-first-agent/`](../../specs/dental_receptionist/001-first-agent/)
+Specs: [`specs/dental_receptionist/`](../../specs/dental_receptionist/) — 001 first agent, 002 call logger,
+003 faster brain, 004 Maya + clinic facts.
 
 | Part | Choice |
 |---|---|
-| Ears (STT) | Deepgram Nova-3, **EU server** (faster from our network) |
-| Brain (LLM) | OpenAI `gpt-5.4-mini` |
+| Ears (STT) | Deepgram Nova-3, **EU server** (faster from our network), keyterms: clinic + doctors' names |
+| Brain (LLM) | OpenAI `gpt-6-luna`, thinking off |
+| Instructions | Maya's persona, output rules, goals, clinic facts, guardrails (`INSTRUCTIONS` in `agent.py`) |
+| Greeting | `Receptionist.on_enter()`: Maya speaks first when she becomes the active agent |
 | Mouth (TTS) | Deepgram Aura-2 (`asteria`), **EU server** |
 | Turn detection | LiveKit `v1-mini`, runs locally on CPU |
 | Server | Our local LiveKit server in Docker (default) or LiveKit Cloud |
@@ -88,11 +93,11 @@ uv run pytest agents/dental_receptionist
 
 | Test file | Checks | Needs |
 |---|---|---|
-| `test_dental_behavior.py` | greets as Bright Smile; doesn't invent hours; doesn't fake a booking | `OPENAI_API_KEY` |
+| `test_dental_behavior.py` | Maya greets first; right hours, address, orthodontist; no medical advice; protects other patients; steers off-topic back; no fake booking; no made-up prices; no lists or symbols in speech | `OPENAI_API_KEY` |
 | `test_dental_voice_speed.py` | voice arrives fast enough (first sound < 1 s, faster than real time) | `DEEPGRAM_API_KEY` |
 | `test_dental_joins_room.py` | the agent in Docker joins a new room on the local server | `docker compose up -d` |
 | `test_call_logger.py` | each event makes the right `[call]` line; one text turn really logs them | the last test: `OPENAI_API_KEY` |
-| `test_dental_stt.py` | the ears know "Bright Smile Dental" (keyterm) | nothing |
+| `test_dental_stt.py` | the ears know "Bright Smile Dental", "Dr. Chen", "Dr. Park" (keyterms) | nothing |
 
 Tests whose needs are missing are **skipped**, not failed.
 

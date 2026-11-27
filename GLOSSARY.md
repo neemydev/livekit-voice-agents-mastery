@@ -17,6 +17,10 @@ through your speakers and answers itself. Browsers do it for you. In console mod
 Deciding the exact moment the caller's turn has ended, so the agent can start its reply.
 It uses a wait time after the speech stops: too short cuts people off, too long feels slow.
 
+### Guardrails
+The "never do this" rules in the instructions, put at the END of the prompt (the end gets a lot of attention).
+Example: Maya never gives medical advice, never talks about other patients, never makes up prices.
+
 ### Interruption (barge-in)
 The caller talks while the agent is speaking. The agent notices (through VAD) and stops talking.
 This makes a voice agent feel like a person, not like a recording you must wait for.
@@ -32,6 +36,14 @@ Each step (network, STT, LLM, TTS) uses part of it. Network time counts twice: t
 ### LLM (Large Language Model)
 The "brain" of a voice agent. It reads text and writes a reply.
 Example: OpenAI's GPT models. In a voice agent it sits between STT and TTS.
+
+### Output rules
+The part of the instructions that says HOW to talk, because the reply will be spoken, not read.
+Example: "one or two short sentences, no lists or symbols, say '8 AM' as 'eight in the morning'".
+
+### Persona
+The character the agent plays: name, tone, way of talking. Write it as behaviour, not only adjectives.
+Example: not just "Maya is warm", but "if the caller tells you their name, use it".
 
 ### Realtime model (speech-to-speech)
 One AI model that hears audio and answers in audio, with no text step in between.
@@ -60,6 +72,10 @@ In LiveKit 1.8 every AgentSession gets a Silero VAD by default. It runs on your 
 ### Voice pipeline
 The chain a voice agent runs on every turn: **STT → LLM → TTS**.
 You speak → it becomes text → the LLM replies in text → the reply is spoken back.
+
+### Voice prompting
+Writing instructions for an agent that SPEAKS. The LLM doesn't know its words become sound, so you tell it.
+Five sections in order: identity, output rules, tools, goals, guardrails.
 
 ---
 
@@ -128,6 +144,10 @@ You can use LiveKit Cloud's servers, or run your own ("self-host"), e.g. in Dock
 ### node_ip
 The address LiveKit tells callers: "send your audio here". Set in `livekit.yaml`; ours is `127.0.0.1`.
 That only works for callers who share the same `127.0.0.1`. That's why our agent shares livekit's network.
+
+### on_enter
+A function on your Agent class that LiveKit runs when that agent becomes the active one in the session.
+Maya uses it to speak first: `self.session.generate_reply(instructions=GREETING)`.
 
 ### Participant
 Anything that connects to a room: a person in a browser, a phone caller, or an AI agent.

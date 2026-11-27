@@ -4,6 +4,35 @@ Newest entry at the top. Each entry: what we did, what we learned, what is next.
 
 ---
 
+## 2026-11-27 — Maya: better instructions and clinic facts (dental receptionist 003 + 004)
+
+**Done**
+- Spec 003 (2026-11-26, **Tested**): the brain is now `gpt-6-luna` with thinking off. First word 0.67 s, was 0.86 s.
+- Lesson: Voice AI Foundations chapter 4, Writing great agent instructions.
+- Spec 004 (intent, spec, plan), now **Tested**. The receptionist is **Maya**.
+- New instructions in 5 parts: who she is, how to speak, goals, clinic facts, safety rules.
+- Maya speaks first from `on_enter()`, not from the startup code.
+- The ears also know "Dr. Chen" and "Dr. Park".
+- 10 behaviour tests, written first: 6 red on the old agent, then all green. Full run: 51 passed.
+- Real call on the local server: "Maya works fine".
+- Glossary: guardrails, output rules, persona, voice prompting, on_enter.
+
+**Learned**
+- A voice prompt is not a text prompt. The LLM doesn't know it will be spoken, so we tell it.
+- Order matters: who she is at the top, safety rules at the bottom. The start and end get the most attention.
+- Write personality as things she does ("use the caller's name"), not only words like "warm".
+- Fixed facts go in the prompt. Changing data (free times) will come from tools.
+- An old test can change on purpose: "must not give hours" became "gives the right hours".
+- `session.start(..., capture_run=True)` lets a test check the `on_enter` greeting.
+- Tests that pass before the change are still useful: they guard what must not break.
+- The voice speed test failed once (1.22 s), then passed twice. Network slow-downs happen; run it again before you worry.
+- Our plugin doesn't know `gpt-6-luna`, so "thinking off" must be set by hand.
+
+**Next**
+- `/lesson voice-ai-foundations` chapter 5: tools. Maya learns to look things up, and later to book.
+
+---
+
 ## 2026-11-25 — Watching a call: dental receptionist 002 (session events)
 
 **Done**
